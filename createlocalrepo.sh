@@ -100,10 +100,9 @@ for distro in $(ls $localrepodir)
 					echo "$(date +%F/%T): rsyncing $PKGORI $PKGDST " >> $outputfile
 					rsync -a --delete --delete-excluded --exclude "local*" --exclude "isos" \
 					rsync://$PKGORI $PKGDST >> $outputfile 2>&1
-					echo "$(date +%F/%T): Previous rsyncing done." >> $outputfile 2>&1
-
+					echo "$(date +%F/%T): Previous rsyncing done." >> $outputfile
 					done
 			done
 	done
 
-echo -e "Script Finished. Please check outputfile: \$outputfile"
+echo "Script Finished. Please check outputfile: $outputfile"
