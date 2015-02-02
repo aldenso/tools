@@ -70,7 +70,7 @@ def showmenuglobal():
 			else:
 				showmenulocal(showmenu1, answer1)
 		except Exception as e:
-			print("Not in the posibilities: {}".format(e))
+			print("Not in the possibilities: {}".format(e))
 
 def showmenulocal(showmenu, answer1):
 	selectedglobal = showmenu1.get(answer1)
@@ -96,7 +96,7 @@ def showmenulocal(showmenu, answer1):
 			else:
 				showmenuurl(selectedglobal, showmenu2, answer2)
 		except Exception as e:
-			print("Not in the posibilities: {}".format(e))
+			print("Not in the possibilities: {}".format(e))
 
 def showmenuurl(selectedglobal, showmenu2, answer2):
 	selectedlocal = showmenu2.get(answer2)
@@ -133,7 +133,7 @@ def showmenuurl(selectedglobal, showmenu2, answer2):
 				print("@"*60)
 
 		except Exception as e:
-			print("Not in the posibilities: {}".format(e))
+			print("Not in the possibilities: {}".format(e))
 
 
 def main():
