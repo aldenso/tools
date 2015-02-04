@@ -64,8 +64,19 @@ def main(hosts, ports, arguments):
                     scannedport.sort()
                     print("#### Protocol: {0} ####".format(proto))
                     for sp in scannedport:
-                        print("Port: {0}  State: {1}".format(int(sp),
-                         nm[host][proto][sp]['state']))
+                        if arguments == '-sV':
+                            name = nm[host][proto][sp].get('name')
+                            product = nm[host][proto][sp].get('product')
+                            version = nm[host][proto][sp].get('version')
+                            extrainfo = nm[host][proto][sp].get('extrainfo')
+                            print("Port: {0}  State: {1}".format(int(sp),
+                            nm[host][proto][sp]['state'])+
+                            "\tName/Product: {0}/{1}".format(name, product)+
+                            " Version/Extrainfo: {0}/{1}".format(version, extrainfo))
+                        else:
+                            print("Port: {0}  State: {1} Name: {2}".format(int(sp),
+                            nm[host][proto][sp]['state'],
+                            nm[host][proto][sp].get('name')))
         except Exception as e:
             print("\n"+"#"*60 + "\nNot possible to scan: {0}\n".format(e)+ "#"*60)
     enddate, endtime = datetime.now().strftime('%Y/%m/%d %H:%M:%S').split()
