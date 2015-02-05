@@ -4,7 +4,8 @@
 # Author: aldenso@gmail.com
 # Description: This script is useful to create a menu based monitoring for
 # servers with properly configured ssh
-import paramiko, os, re
+import paramiko, os
+import ipaddr as ip
 
 commands = ['df -h', 'free -m', 'tail -5 /var/log/messages']
 menu = {}
@@ -42,14 +43,14 @@ def main():
             answer = raw_input("Press (0) to exit.\n")
             if answer == '0':
                 exit("Bye")
-            # It can be improved
-            elif not re.match(r'\d{1,3}\.\d{1,3}\.+\d{1,3}\.\d{1,3}', answer):
-                print("[-] Format Not Accepted.")
-                main()
+            elif not ip.IPAddress(answer):
+                # Generate exception for non ip values
+                pass
             else:
                 ipaddr=answer
         except Exception as e:
             print("Error ==> {}".format(e))
+            main()
 
     print("#"*60+"\nPlease indicate the commands to execute:\n"+
         "in server: {0}\n".format(ipaddr)+"#"*60)
