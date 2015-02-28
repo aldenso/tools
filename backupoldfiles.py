@@ -37,7 +37,7 @@ def createarchive(dir2copybackup, dir2backup, files2backup):
         try:
             for file in files2backup:
                 print("---> adding {}".format(file))
-                zf.write(dir2backup+"/"+file, compress_type=zipfile.ZIP_DEFLATED)
+                zf.write(dir2backup+"/"+file, arcname=file, compress_type=zipfile.ZIP_DEFLATED)
         except Exception as e:
             print("Error: {}".format(e))
         finally:
