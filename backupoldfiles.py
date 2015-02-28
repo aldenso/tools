@@ -3,7 +3,7 @@
 # Author: aldenso@gmail.com
 # Description: small tool to make backups based on age in days
 
-import datetime, os, zipfile
+import datetime, os, zipfile, zlib
 
 # Timestamp to compare age of files
 a = datetime.datetime.now()
@@ -14,8 +14,8 @@ backupts = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 # directory, change it to the desired age.
 fileage = 90
 # Set tuples for origin and destiny dir to backup 
-dirs2backup = [("/home/aldo/prueba", "/tmp/prueba"),
-               ("/tmp/prueba2_origin", "/tmp/prueba2")]
+dirs2backup = [("/tmp/prueba1_origin", "/tmp/prueba1_destiny"),
+               ("/tmp/prueba2_origin", "/tmp/prueba2_destiny")]
 
 def checkage(files, dir2backup):
     list2backup = []
@@ -28,18 +28,27 @@ def checkage(files, dir2backup):
     return list2backup
 
 def createarchive(dir2copybackup, dir2backup, files2backup):
-    archivefile = dir2copybackup+"/"+"backup_"+backupts+".zip"
-    print("#### Creating Archive: {0} ####".format(archivefile))
-    zf = zipfile.ZipFile(archivefile, mode="w")
-    try:
-        for file in files2backup:
-            print("---> adding {0}".format(file))
-            zf.write(dir2backup+"/"+file)
-    except Exception as e:
-        print("Error: {0}".format(e))
-    finally:
-        print("#### Closing archive ####")
-        zf.close()
+    if len(files2backup) == 0:
+        print("Nothing to do for {}".format(dir2backup))
+    else:
+        archivefile = dir2copybackup+"/"+"backup_"+backupts+".zip"
+        print("#### Creating Archive: {} ####".format(archivefile))
+        zf = zipfile.ZipFile(archivefile, mode="w")
+        try:
+            for file in files2backup:
+                print("---> adding {}".format(file))
+                zf.write(dir2backup+"/"+file, compress_type=zipfile.ZIP_DEFLATED)
+        except Exception as e:
+            print("Error: {}".format(e))
+        finally:
+            print("#### Report of files in archive ####")
+            for file in zf.infolist():
+                print("File Name:\t{}".format(file.filename))
+                print("Created:\t{}".format(datetime.datetime(*file.date_time)))
+                print("Compressed size:\t{}".format(file.compress_size))
+                print("Uncompressed size:\t{}".format(file.file_size))
+            print("#### Closing archive ####")
+            zf.close()
 
 
 def main(dirs2backup):
@@ -53,6 +62,5 @@ def main(dirs2backup):
         print("Files_to_backup:\n"+str(files2backup))
         createarchive(dir2copybackup, dir2backup, files2backup)
         
-
 if __name__ == "__main__":
     main(dirs2backup)
