@@ -4,6 +4,7 @@
 # Description: small tool to make backups based on age in days
 
 import datetime, os, zipfile, zlib
+from subprocess import Popen, PIPE
 
 # Timestamp to compare age of files
 a = datetime.datetime.now()
@@ -61,8 +62,13 @@ def createarchive(dir2copybackup, dir2backup, files2backup):
         zf = zipfile.ZipFile(archivefile, mode="w")
         try:
             for file in files2backup:
-                print("---> adding {}".format(file))
+                print("++++ adding {}".format(file))
                 zf.write(dir2backup+"/"+file, arcname=file, compress_type=zipfile.ZIP_DEFLATED)
+                cmd = "rm -f {0}/{1}".format(dir2backup, file)
+                p = Popen(cmd, stdout=PIPE, shell=True)
+                output, error = p.communicate()
+                if not error:
+                    print("---- {} archived and original deleted".format(file))
         except Exception as e:
             print("Error: {}".format(e))
         finally:
