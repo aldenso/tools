@@ -26,6 +26,22 @@ def checkdirs(dirs2backup):
                 print("Directory {} doesn't exists".format(dir))
                 exit("Please create it")
 
+def checkperm(dirs2backup):
+    count=0
+    for dir in dirs2backup:
+        dir2backup = dir[0]
+        print("Checking permissions in: {}".format(dir2backup))
+        files = os.listdir(dir2backup)
+        files2backup = checkage(files, dir2backup)
+        for file in files2backup:
+            if not os.access(dir2backup+"/"+file, os.W_OK) or not os.access(dir2backup+"/"+file, os.R_OK):
+                count += 1
+                print("You don't have the proper permissions on file: {}".format(file))
+    if count != 0:
+        exit("Check your permissions: {} permissions wrong".format(count))
+    else:
+        print("Permissions OK")
+
 def checkage(files, dir2backup):
     list2backup = []
     for file in files:
@@ -62,6 +78,7 @@ def createarchive(dir2copybackup, dir2backup, files2backup):
 
 def main(dirs2backup):
     checkdirs(dirs2backup)
+    checkperm(dirs2backup)
     for dir in dirs2backup:
         dir2backup = dir[0]
         dir2copybackup = dir[1]
