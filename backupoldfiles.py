@@ -17,6 +17,15 @@ fileage = 90
 dirs2backup = [("/tmp/prueba1_origin", "/tmp/prueba1_destiny"),
                ("/tmp/prueba2_origin", "/tmp/prueba2_destiny")]
 
+def checkdirs(dirs2backup):
+    for dirs in dirs2backup:
+        for dir in dirs:
+            if os.path.exists(dir):
+                continue
+            else:
+                print("Directory {} doesn't exists".format(dir))
+                exit("Please create it")
+
 def checkage(files, dir2backup):
     list2backup = []
     for file in files:
@@ -52,6 +61,7 @@ def createarchive(dir2copybackup, dir2backup, files2backup):
 
 
 def main(dirs2backup):
+    checkdirs(dirs2backup)
     for dir in dirs2backup:
         dir2backup = dir[0]
         dir2copybackup = dir[1]
