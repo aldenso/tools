@@ -1,4 +1,10 @@
 #!/usr/bin/env python2
+#
+# File: filesystemalert.py
+# Author: aldenso@gmail.com
+# Description: This script is useful to set filesystem alerts based on
+# defined thresholds
+
 from subprocess import Popen, PIPE
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
