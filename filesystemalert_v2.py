@@ -6,7 +6,6 @@
 # defined thresholds, also you can exclude fs from the alerts
 
 from subprocess import Popen, PIPE
-from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 import smtplib
 
