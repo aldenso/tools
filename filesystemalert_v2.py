@@ -7,7 +7,7 @@
 
 from subprocess import Popen, PIPE
 from email.MIMEText import MIMEText
-import smtplib
+import smtplib, syslog
 
 fromaddr="root@localhost"
 toaddrs="aldo@localhost"
@@ -76,6 +76,7 @@ def main():
         sendmail(fsalert)
         for entry in fsalert:
             print(entry)
+        syslog.syslog("File System Alert, mail sent to admins")
     else:
         print("Nothing to report")
 
