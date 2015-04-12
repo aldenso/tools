@@ -15,8 +15,8 @@ backupts = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 # directory, change it to the desired age.
 fileage = 90
 # Set tuples for origin and destiny dir to backup 
-dirs2backup = [("/tmp/prueba1_origin", "/tmp/prueba1_destiny"),
-               ("/tmp/prueba2_origin", "/tmp/prueba2_destiny")]
+dirs2backup = [("/backups/prueba1_origin", "/backups/prueba1_destiny"),
+               ("/backups/prueba2_origin", "/backups/prueba2_destiny")]
 
 def checkdirs(dirs2backup):
     for dirs in dirs2backup:
@@ -94,6 +94,24 @@ def main(dirs2backup):
         print("Dir_Origin: {0}\nDir_Destiny: {1}".format(dir[0], dir[1]))
         print("Files_to_backup:\n"+str(files2backup))
         createarchive(dir2copybackup, dir2backup, files2backup)
-        
+        archivefile = dir2copybackup+"/"+"backup_"+backupts+".zip"
+        if os.path.exists(archivefile):
+            with open(dir2copybackup+"/backup_{}.log".format(backupts), "wb") as f:
+                f.write("#"*50+"\n")
+                f.write("Dir_Origin: {0}\nDir_Destiny: {1}\n".format(dir[0], dir[1]))
+                f.write("Files_in_backup:\n")
+                zf = zipfile.ZipFile(archivefile, mode="r")
+                f.write("Filename\tCreated\tCompSize\tUncompSize\n")
+                for file in zf.infolist():
+                    filename = file.filename
+                    createdtime = datetime.datetime(*file.date_time)
+                    compressedsize = file.compress_size
+                    uncompressedsize = file.file_size
+                    f.write("{0}\t{1}\t{2}\t{3}\n".format(filename, createdtime,
+                        compressedsize, uncompressedsize))
+                zf.close()
+        else:
+            print("No log file generated")
+
 if __name__ == "__main__":
     main(dirs2backup)
