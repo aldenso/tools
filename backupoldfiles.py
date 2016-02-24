@@ -1,4 +1,4 @@
-#/usr/bin/python
+#!/usr/bin/python
 
 # Author: aldenso@gmail.com
 # Description: small tool to make backups based on age in days
