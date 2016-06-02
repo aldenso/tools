@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# On the shell just execute : "fab fabfile checkfs" or just one of the functions
+# On the shell just execute : "fab checkfs" or just one of the functions
 import datetime
 from fabric.api import local, run, env
 
