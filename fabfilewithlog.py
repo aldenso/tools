@@ -1,8 +1,12 @@
 #!/usr/bin/env python
+<<<<<<< HEAD
 # On the shell just execute : "fab fabfile checkfs" or just one of the functions.
 # run and sudo are almost equal but of course sudo if used with sudo privileges
 # you can set an optional sudo users privileges ex: sudo("ls", user="www") or
 # sudo("ls", user=1001)
+=======
+# On the shell just execute : "fab checkfs" or just one of the functions
+>>>>>>> 100959db53df1d9545633ef96f4ba114404da9f9
 import datetime
 from fabric.api import local, run, sudo, env, parallel
 
