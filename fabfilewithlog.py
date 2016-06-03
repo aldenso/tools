@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# On the shell just execute : "fab fabfile checkfs" or just one of the functions.
+# On the shell just execute : "fab checkfs" or just one of the functions.
 # run and sudo are almost equal but of course sudo if used with sudo privileges
 # you can set an optional sudo users privileges ex: sudo("ls", user="www") or
 # sudo("ls", user=1001)
