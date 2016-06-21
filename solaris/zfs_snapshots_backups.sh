@@ -3,18 +3,22 @@
 # @Date:   2016-06-20T19:11:53-04:30
 # @Email:  aldenso@gmail.com
 # @Last modified by:   Aldo Sotolongo
-# @Last modified time: 2016-06-20T21:00:48-04:30
+# @Last modified time: 2016-06-20T22:03:22-04:30
 # Description: zpools backups using zfs snapshots and gzip to save some space,
 # you need to have remote filesystem mounted.
 
 BACKUPDIR="/backups"
 DATE=$(date +%d_%m_%y)
+STARTTIME=$(date +%d/%m/%y" "%H:%M:%S)
 POOLEXCLUDE="" #Ex. POOLEXCLUDE="rpool bigpool"
 HASH="#########################################################################"
 
 # Check if the backups nfs is mounted.
 if $(mount | grep -w "$BACKUPDIR" > /dev/null 2>&1 );
 then
+  echo $HASH
+  echo "Started at $STARTTIME"
+  echo $HASH
   # List all zfs pools
   # if you don't want to backup rpool then remove the comment on the next line and comment the one after.
   # pools=$(zpool list | awk '{print $1}' | egrep -v "NAME|rpool")
@@ -96,6 +100,10 @@ then
     echo "Deleting snapshot."
     echo $HASH
     zfs destroy -r "$pool"@"$pool".pool.snap
+
+    echo $HASH
+    echo "Finished $pool at $(date +%d/%m/%y" "%H:%M:%S)"
+    echo $HASH
   done
 
 else
