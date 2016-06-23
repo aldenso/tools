@@ -3,7 +3,7 @@
 # @Date:   2016-06-20T19:11:53-04:30
 # @Email:  aldenso@gmail.com
 # @Last modified by:   Aldo Sotolongo
-# @Last modified time: 2016-06-20T22:03:22-04:30
+# @Last modified time: 2016-06-23T09:25:25-04:30
 # Description: zpools backups using zfs snapshots and gzip to save some space,
 # you need to have remote filesystem mounted.
 
@@ -76,6 +76,11 @@ then
     echo "Creating snapshot $pool@$pool.snap"
     echo $HASH
     zfs snapshot -r "$pool"@"$pool".pool.snap
+    if [ $? -ne 0 ]
+    then
+      echo "Failed to create snapshot for $pool"
+      continue
+    fi
 
     # Optional, you can remove the next block, but I don't need dump and swap
     # to be in the backup, plus you can save a lot of space.
