@@ -3,7 +3,7 @@
 # @Author: Aldo Sotolongo
 # @Date:   2016-06-26 18:04:58
 # @Last modified by:   Aldo Sotolongo
-# @Last modified time: 2016-07-01T10:08:14-04:30
+# @Last modified time: 2016-07-01T10:16:45-04:30
 # Note: Must run with a user with privileges on the dirs
 
 import os
@@ -41,17 +41,11 @@ Logs distribution:""" % ((SIZEALERT / (1024 * 1024)), COUNTALERT, directory,
     hash("*")
 
 
-def onerror(x):
-    print x
-
-
 def getinfo(dir):
     dirsdict = {}
     count = 0
     size = 0
-    for path, dirs, files in os.walk(dir, onerror=onerror):
-        if onerror is not None:
-            continue
+    for path, dirs, files in os.walk(dir):
         for file in files:
             fullfile = join(path, file)
             if fullfile.endswith(tuple(EXT)):
