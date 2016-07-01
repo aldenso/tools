@@ -3,14 +3,15 @@
 # @Author: Aldo Sotolongo
 # @Date:   2016-06-26 18:04:58
 # @Last modified by:   Aldo Sotolongo
-# @Last modified time: 2016-06-27T01:32:02-04:30
+# @Last modified time: 2016-07-01T10:08:14-04:30
+# Note: Must run with a user with privileges on the dirs
 
 import os
 import csv
 from os.path import join, getsize
 from datetime import datetime, date
 
-DIRS = ["/export/home", "/var"]
+DIRS = ["/export/home", "/var", "/root"]
 EXT = [".log", ".xml", ".aud"]
 # Size 10 MB
 SIZEALERT = 10 * (1024 * 1024)
@@ -40,11 +41,17 @@ Logs distribution:""" % ((SIZEALERT / (1024 * 1024)), COUNTALERT, directory,
     hash("*")
 
 
+def onerror(x):
+    print x
+
+
 def getinfo(dir):
     dirsdict = {}
     count = 0
     size = 0
-    for path, dirs, files in os.walk(dir):
+    for path, dirs, files in os.walk(dir, onerror=onerror):
+        if onerror is not None:
+            continue
         for file in files:
             fullfile = join(path, file)
             if fullfile.endswith(tuple(EXT)):
@@ -62,16 +69,24 @@ def getinfo(dir):
     return size, count, dirsdict
 
 
-for d in DIRS:
-    size, count, dirsdict = getinfo(d)
-    hash()
-    if size > SIZEALERT or count > COUNTALERT:
-        alert(d, count, size, dirsdict)
-        with open("warning_" + d.strip("/").replace("/", "_") + "_" + DATETIME + ".log", "wb") as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(["directory", "size in bytes", "number of logs"])
-            for k, v in dirsdict.iteritems():
-                writer.writerow([k, v[0], v[1]])
-    else:
-        print "logs for %s:\nCount: %d\nFull size: %dMB" \
-          % (d, count, (size / (1024 * 1024)))
+def main():
+    for d in DIRS:
+        size, count, dirsdict = getinfo(d)
+        hash()
+        if size > SIZEALERT or count > COUNTALERT:
+            alert(d, count, size, dirsdict)
+            with open("warning_" + d.strip("/").replace("/", "_") +
+                      "_" + DATETIME + ".log", "wb") as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(["directory", "size in bytes",
+                                 "number of logs"])
+                for k, v in dirsdict.iteritems():
+                    writer.writerow([k, v[0], v[1]])
+        else:
+            print "logs for %s:\nCount: %d\nFull size: %dMB" \
+                   % (d, count, (size / (1024 * 1024)))
+
+
+
+if __name__ == '__main__':
+    main()
