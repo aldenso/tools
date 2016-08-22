@@ -3,8 +3,10 @@
 # @Date:   2016-05-25T14:22:58-04:00
 # @Email:  aldenso@gmail.com
 # @Last modified by:   Aldo Sotolongo
-# @Last modified time: 2016-08-21T23:25:58-04:00
-# Description: simple cp script with progress status
+# @Last modified time: 2016-08-21T23:49:39-04:00
+# Description: simple cp script with progress status, make sure you set the
+# filename for destiny.
+# example: cp_progress.py ../../file1.txt /tmp/file1.txt
 
 import os
 import sys
@@ -20,7 +22,7 @@ size = 0
 
 
 def porcent(size):
-    x = (size*100)/orig_size
+    x = (size * 100) / orig_size
     return x
 
 
@@ -37,7 +39,7 @@ def main():
             task = 'DONE'
         else:
             value = porcent(size)
-            sys.stdout.write("\rCopying File %d%%" % value)
+            sys.stdout.write("\rCopying File {}%".format(value))
             sys.stdout.flush()
 
 if __name__ == "__main__":
