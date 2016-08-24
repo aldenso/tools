@@ -1,7 +1,10 @@
-#!/usr/bin/env python2
-#
+#!/usr/bin/python
+# @Author: Aldo Sotolongo
+# @Date:   2016-05-25T14:22:59-04:00
+# @Email:  aldenso@gmail.com
+# @Last modified by:   Aldo Sotolongo
+# @Last modified time: 2016-08-23T20:37:29-04:00
 # File: filesystemalert.py
-# Author: aldenso@gmail.com
 # Description: This script is useful to set filesystem alerts based on
 # defined thresholds
 
@@ -10,14 +13,14 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 import smtplib
 
-fromaddr="root@localhost"
-toaddrs="aldo@localhost"
-#toaddrs=["aldo@localhost","aldo@aldoca.com","aldenso@gmail.com"]
+fromaddr = "root@localhost"
+toaddrs = "aldo@localhost"
+# toaddrs=["aldo@localhost","aldo@aldoca.com","aldenso@gmail.com"]
 
 # Set thresholds
-yellow=85
-orange=90
-red=95
+yellow = 85
+orange = 90
+red = 95
 # FS in alert
 fsalert = []
 
@@ -32,9 +35,10 @@ for i in filesystems:
     if i == '[SWAP]' or i == 'MOUNTPOINT':
         filesystems.remove(i)
 
+
 def checkusage(filesystems):
     for fs in filesystems:
-        cmd="df {} | tail -1".format(fs)
+        cmd = "df {} | tail -1".format(fs)
         p = Popen(cmd, stdout=PIPE, shell=True)
         output, error = p.communicate()
         usage = int(output.split()[4][:-1])
@@ -50,6 +54,7 @@ def checkusage(filesystems):
         else:
             print("{}:normal usage".format(fs))
 
+
 def sendmail(fsalert):
     msg = MIMEMultipart()
     msg['From'] = fromaddr
@@ -60,9 +65,10 @@ def sendmail(fsalert):
     text = msg.as_string()
 
     server = smtplib.SMTP('localhost')
-    #server.set_debuglevel(1)
+    # server.set_debuglevel(1)
     server.sendmail(fromaddr, toaddrs, text)
     server.quit()
+
 
 def main():
     checkusage(filesystems)
