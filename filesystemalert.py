@@ -3,7 +3,7 @@
 # @Date:   2016-05-25T14:22:59-04:00
 # @Email:  aldenso@gmail.com
 # @Last modified by:   Aldo Sotolongo
-# @Last modified time: 2016-08-23T20:37:29-04:00
+# @Last modified time: 2016-08-31T13:45:59-04:00
 # File: filesystemalert.py
 # Description: This script is useful to set filesystem alerts based on
 # defined thresholds
@@ -24,14 +24,14 @@ red = 95
 # FS in alert
 fsalert = []
 
-filesystems = []
+filesystems = set()
 cmd = "lsblk"
 p = Popen(cmd, stdout=PIPE, shell=True)
 output, error = p.communicate()
 for line in output.splitlines():
     if len(line.split()) == 7:
-        filesystems.append(line.split()[6])
-for i in filesystems:
+        filesystems.add(line.split()[6])
+for i in filesystems.copy():
     if i == '[SWAP]' or i == 'MOUNTPOINT':
         filesystems.remove(i)
 

@@ -3,7 +3,7 @@
 # @Date:   2016-05-25T14:22:59-04:00
 # @Email:  aldenso@gmail.com
 # @Last modified by:   Aldo Sotolongo
-# @Last modified time: 2016-08-23T21:47:23-04:00
+# @Last modified time: 2016-08-31T13:44:47-04:00
 # File: filesystemalert_v2.py
 # Description: This script is useful to set filesystem alerts based on
 # defined thresholds, also you can exclude fs from the alerts
@@ -34,15 +34,15 @@ fsalert = ["Alert type\tFileSystem\tUsage\n"]
 # FS in alert, the first element is the header
 inodealert = ["Alert type\tFileSystem\tUsage\n"]
 
-filesystems = []
-# if some filesystem is a raid it may be shown more than once in the output.
+filesystems = set()
+
 cmd = "lsblk"
 p = Popen(cmd, stdout=PIPE, shell=True)
 output, error = p.communicate()
 for line in output.splitlines():
     if len(line.split()) == 7:
-        filesystems.append(line.split()[6])
-for i in filesystems:
+        filesystems.add(line.split()[6])
+for i in filesystems.copy():
     if i == '[SWAP]' or i == 'MOUNTPOINT':
         filesystems.remove(i)
 
