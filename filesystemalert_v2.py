@@ -3,7 +3,7 @@
 # @Date:   2016-05-25T14:22:59-04:00
 # @Email:  aldenso@gmail.com
 # @Last modified by:   Aldo Sotolongo
-# @Last modified time: 2016-08-31T13:44:47-04:00
+# @Last modified time: 2016-09-02T23:55:09-04:00
 # File: filesystemalert_v2.py
 # Description: This script is useful to set filesystem alerts based on
 # defined thresholds, also you can exclude fs from the alerts
@@ -30,9 +30,9 @@ yellowinode = 85
 orangeinode = 90
 redinode = 95
 # FS in alert, the first element is the header
-fsalert = ["Alert type\tFileSystem\tUsage\n"]
+fsalert = ["Alert type\tFileSystem Space\tUsage\n"]
 # FS in alert, the first element is the header
-inodealert = ["Alert type\tFileSystem\tUsage\n"]
+inodealert = ["Alert type\tFileSystem Inodes\tUsage\n"]
 
 filesystems = set()
 
