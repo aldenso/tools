@@ -5,13 +5,20 @@ Small python script to check if some directories have more logs than is healthy,
 
 Set your values:
 ```python
-DIRS = ["/export/home", "/var"]
-EXT = [".log", ".xml", ".aud"]
 # Size 10 MB
 SIZEALERT = 10 * (1024 * 1024)
 COUNTALERT = 100
 DATETIME = datetime.now().strftime("%d%m%y_%H%M%S")
+
+DIRS = [
+    ["/export/home", 10 * 1024 * 1024, 100],
+    ["/var", 10485760, 100],
+    ["/root"]
+]
+EXT = [".log", ".xml", ".aud"]
 ```
+
+Every directory list inside DIRS needs to be 1 or 3 in length, if its 1 for that directory, it will use the defaults (SIZEALERT and COUNTALERT).
 
 
 Output sample:
