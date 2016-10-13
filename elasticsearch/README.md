@@ -16,41 +16,54 @@ pip install elasticsearch
 Usage
 ```
 $ ./elastictask.py -h
-usage: elastictask.py [-h] -s SERVER [-p PORT] [-c | -o | -l]
-                      [-i INDEX [INDEX ...] | -d DAYS]
+usage: elastictask.py [-h] -s SERVER [-p PORT] {indices,snapshot,repo} ...
 
 Script to handle some common tasks in Elasticsearch
+
+positional arguments:
+  {indices,snapshot,repo}
+                        commands
+    indices             Actions with indices
+    snapshot            Actions with snapshots
+    repo                Actions with repositories
 
 optional arguments:
   -h, --help            show this help message and exit
   -s SERVER, --server SERVER
                         Elasticsearch Address
-  -p PORT, --port PORT  Elasticsearch Port
-  -c, --close           List Closed Indices or Action to Close when used with
-                        -d or -i
-  -o, --open            List Open Indices or Action to Open when used with
-                        -d or -i
+  -p PORT, --port PORT  Elasticsearch port
+```
+
+You can check the help for the different arguments (indices, snapshot, repo).
+
+```
+$ ./elastictask.py indices -h
+usage: elastictask.py indices [-h] [-l | -o | -c] [-i INDEX [INDEX ...] | -d
+                              DAYS]
+
+optional arguments:
+  -h, --help            show this help message and exit
   -l, --list            List all indices
+  -o, --open            List open indices
+  -c, --close           List closed indices
   -i INDEX [INDEX ...], --index INDEX [INDEX ...]
                         Indices List
-  -d DAYS, --days DAYS  Age in days, older than this will be open or close.
+  -d DAYS, --days DAYS  Age in days, older than this will be open or close
 ```
 
 List all indices.
 
 ```
-$ ./elastictask.py -s elk.aldoca.local -l
-Server: elk.aldoca.local
-Port: 9200
-
-Indices: 17
+$ ./elastictask.py -s elk.aldoca.local indices --list
+Indices: 18
 ======================================================================
 close logstash-2016.09.11
 close logstash-2016.09.13
 close logstash-2016.09.14
 close logstash-2016.09.15
+close logstash-2016.09.16
+red open logstash-2016.10.13 5 1 54 0 291.7kb 291.7kb
 yellow open .kibana 1 1 140 1 123.5kb 123.5kb
-yellow open logstash-2016.09.16 5 1 742 0 691.5kb 691.5kb
 yellow open logstash-2016.09.17 5 1 913 0 753kb 753kb
 yellow open logstash-2016.09.18 5 1 697 0 360.8kb 360.8kb
 yellow open logstash-2016.09.19 5 1 1210 0 857.8kb 857.8kb
@@ -61,34 +74,30 @@ yellow open logstash-2016.09.23 5 1 1543 0 469.3kb 469.3kb
 yellow open logstash-2016.09.30 5 1 60 0 218.4kb 218.4kb
 yellow open logstash-2016.10.01 5 1 54 0 267.2kb 267.2kb
 yellow open logstash-2016.10.11 5 1 96 0 256.5kb 256.5kb
-yellow open logstash-2016.10.12 5 1 226 0 455.5kb 455.5kb
+yellow open logstash-2016.10.12 5 1 354 0 296.1kb 296.1kb
 ```
 
 List closed indices.
 
 ```
-$ ./elastictask.py -s elk.aldoca.local -c
-Server: elk.aldoca.local
-Port: 9200
-
-Close Indices: 4
+$ ./elastictask.py -s elk.aldoca.local indices --close
+Close Indices: 5
 ======================================================================
 close logstash-2016.09.11
 close logstash-2016.09.13
 close logstash-2016.09.14
 close logstash-2016.09.15
+close logstash-2016.09.16
 ```
 
 List open indices.
-```
-$ ./elastictask.py -s elk.aldoca.local -o
-Server: elk.aldoca.local
-Port: 9200
 
+```
+$ ./elastictask.py -s elk.aldoca.local indices --open
 Open Indices: 13
 ======================================================================
+red open logstash-2016.10.13 5 1 59 0 357.4kb 357.4kb
 yellow open .kibana 1 1 140 1 123.5kb 123.5kb
-yellow open logstash-2016.09.16 5 1 742 0 691.5kb 691.5kb
 yellow open logstash-2016.09.17 5 1 913 0 753kb 753kb
 yellow open logstash-2016.09.18 5 1 697 0 360.8kb 360.8kb
 yellow open logstash-2016.09.19 5 1 1210 0 857.8kb 857.8kb
@@ -99,22 +108,18 @@ yellow open logstash-2016.09.23 5 1 1543 0 469.3kb 469.3kb
 yellow open logstash-2016.09.30 5 1 60 0 218.4kb 218.4kb
 yellow open logstash-2016.10.01 5 1 54 0 267.2kb 267.2kb
 yellow open logstash-2016.10.11 5 1 96 0 256.5kb 256.5kb
-yellow open logstash-2016.10.12 5 1 228 0 475.5kb 475.5kb
+yellow open logstash-2016.10.12 5 1 354 0 296.1kb 296.1kb
 ```
 
 When you combine option "--close" or "--open" with "--days" or "--index" you can open or close the indices according to the specified in the last argument.
 
-**Note**: When opening or closing indices, kibana index is ignored.
+**Note**: When opening or closing indices, kibana index is ignored in the script.
 
 Closing indices older than 10 days.
 
 ```
-]$ ./elastictask.py -s elk.aldoca.local -c -d 10
-Server: elk.aldoca.local
-Port: 9200
-
+$ ./elastictask.py -s elk.aldoca.local indices -c -d 10
 Closing:
-logstash-2016.09.16
 logstash-2016.09.17
 logstash-2016.09.18
 logstash-2016.09.19
@@ -123,15 +128,60 @@ logstash-2016.09.21
 logstash-2016.09.22
 logstash-2016.09.23
 logstash-2016.09.30
+logstash-2016.10.01
 ```
 
 Open just a couple of indices.
-```
-$ ./elastictask.py -s elk.aldoca.local -o -i logstash-2016.09.30 logstash-2016.09.23
-Server: elk.aldoca.local
-Port: 9200
 
+```
+$ ./elastictask.py -s elk.aldoca.local indices --open --index logstash-2016.10.01 logstash-2016.09.30
 Opening:
+logstash-2016.10.01
 logstash-2016.09.30
-logstash-2016.09.23
+```
+
+List Repositories.
+
+```
+$ ./elastictask.py -s elk.aldoca.local repo --list
+{
+    "archives": {
+        "type": "fs",
+        "settings": {
+            "compress": "true",
+            "location": "/backups/archives"
+        }
+    }
+}
+```
+
+Show Snapshots in the 'archives' repository.
+
+```
+$ ./elastictask.py -s elk.aldoca.local snapshot --repo archives --list
+{
+    "snapshots": [
+        {
+            "duration_in_millis": 7423,
+            "start_time": "2016-09-22T00:45:20.687Z",
+            "shards": {
+                "successful": 10,
+                "failed": 0,
+                "total": 10
+            },
+            "version_id": 2040099,
+            "end_time_in_millis": 1474505128110,
+            "state": "SUCCESS",
+            "version": "2.4.0",
+            "snapshot": "snapshot_1",
+            "end_time": "2016-09-22T00:45:28.110Z",
+            "indices": [
+                "logstash-2016.09.11",
+                "logstash-2016.09.13"
+            ],
+            "failures": [],
+            "start_time_in_millis": 1474505120687
+        }
+    ]
+}
 ```

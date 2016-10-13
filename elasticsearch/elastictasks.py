@@ -3,7 +3,7 @@
 # @Date:   2016-10-11T21:17:52-04:00
 # @Email:  aldenso@gmail.com
 # @Last modified by:   Aldo Sotolongo
-# @Last modified time: 2016-10-11T21:59:55-04:00
+# @Last modified time: 2016-10-12T21:33:02-04:00
 
 from elasticsearch import Elasticsearch
 from datetime import datetime
@@ -145,6 +145,46 @@ class Modify:
                 print("Error: {}".format(err))
 
 
+class Snapshot:
+    """
+    Work with elasticsearch snapshots.
+    """
+
+    def __init__(self, esinst, repo, **kwargs):
+        self.esinst = esinst
+        self.repo = repo
+        self.snapname = kwargs.get("snapname", None)
+        self.idxlist = kwargs.get("idxlist", None)
+
+    def showSnap(self):
+        show = self.esinst.snapshot.get(
+            repository=self.repo, snapshot="_all")
+        return json.dumps(show, indent=4)
+
+    def createSnap(self):
+        pass
+
+
+class Repository:
+    """
+    Work with elasticsearch repositories.
+    """
+
+    def __init__(self, esinst, repo):
+        self.esinst = esinst
+        self.repo = repo
+
+    def listRepo(self):
+        if self.repo is not None:
+            list = self.esinst.snapshot.get_repository(
+                repository="_all")
+            return json.dumps(list, indent=4)
+        else:
+            list = self.esinst.snapshot.get_repository(
+                repository=self.repo)
+            return json.dumps(list, indent=4)
+
+
 def is_reachable(SERVER, PORT):
     """Check if the server and port is reachable."""
     try:
@@ -166,50 +206,55 @@ def get_args():
         required=True)
     parser.add_argument(
         "-p", "--port", type=int,
-        help="Elasticsearch Port",
+        help="Elasticsearch port",
         default=9200,
         required=False)
-    group1 = parser.add_mutually_exclusive_group()
-    group1.add_argument(
-        "-c", "--close",
-        help="List Closed Indices or Action to Close when used with -d or -i",
-        action="store_true")
-    group1.add_argument(
-        "-o", "--open",
-        help="List Open Indices or Action to Open when used with -d or -i",
-        action="store_true")
-    group1.add_argument(
-        "-l", "--list", help="List all indices", action="store_true")
-    group2 = parser.add_mutually_exclusive_group()
-    group2.add_argument(
-        "-i", "--index", type=str, help="Indices List", nargs="+")
-    group2.add_argument(
+    subparserrepo = parser.add_subparsers(help="commands", dest="parser_name")
+    # Parser for Indices
+    indices = subparserrepo.add_parser("indices", help="Actions with indices")
+    idxgroup1 = indices.add_mutually_exclusive_group()
+    idxgroup1.add_argument("-l", "--list", help="List all indices",
+                           action="store_true")
+    idxgroup1.add_argument("-o", "--open", help="List open indices",
+                           action="store_true")
+    idxgroup1.add_argument("-c", "--close", help="List closed indices",
+                           action="store_true")
+    idxgroup2 = indices.add_mutually_exclusive_group()
+    idxgroup2.add_argument("-i", "--index", type=str, help="Indices List",
+                           nargs="+")
+    idxgroup2.add_argument(
         "-d", "--days", type=int,
-        help="Age in days, older than this will be open or close.")
+        help="Age in days, older than this will be open or close")
+    # Parser for snapshots
+    snap = subparserrepo.add_parser("snapshot", help="Actions with snapshots")
+    snap.add_argument("-l", "--list", action="store_true",
+                      help="Show Snapshot in specified repo")
+    snap.add_argument("--repo", action="store", help="Repository to use",
+                      required=True)
+    snapgroup1 = snap.add_mutually_exclusive_group()
+    snapgroup1.add_argument("--create", action="store", help="Create Snapshot")
+    snapgroup1.add_argument("--delete", action="store", help="Delete Snapshot")
+    # Parser for repositories
+    repo = subparserrepo.add_parser("repo", help="Actions with repositories")
+    repo.add_argument("-l", "--list", action="store_true")
+    repo.add_argument("--repo", action="store")
+
     args = parser.parse_args()
     return args
 
 
-def main():
-    args = get_args()
-    SERVER = args.server
-    PORT = args.port
+def indicesCommands(es, info, args):
     INDICES = args.list
     OPEN = args.open
     CLOSE = args.close
     INDEX = args.index
     DAYS = args.days
-    is_reachable(SERVER, PORT)
-    es = Elasticsearch(SERVER, port=PORT)
-    info = Info(es)
-    print("Server: {}\nPort: {}\n".format(SERVER, PORT))
-
     if INDICES:
         indicesinfo = info.getIndices()
         print("Indices: {}\n{}\n{}\n"
               .format(indicesinfo.count,  # count
                       "=" * 70,
-                      indicesinfo.listinlines  # list joined with "\n"
+                      indicesinfo.listinlines  # list with joined with "\n"
                       )
               )
     elif OPEN and DAYS is not None:
@@ -226,7 +271,7 @@ def main():
         print("Open Indices: {}\n{}\n{}\n"
               .format(openindicesinfo.count,  # count
                       "=" * 70,
-                      openindicesinfo.listinlines  # list joined with "\n"
+                      openindicesinfo.listinlines  # list with joined with "\n"
                       )
               )
     elif CLOSE and DAYS is not None:
@@ -246,6 +291,43 @@ def main():
                       closeindicesinfo.listinlines  # list joined with "\n"
                       )
               )
+
+
+def snapCommands(es, args):
+    REPO = args.repo
+    LIST = args.list
+    CREATE = args.create
+    DELETE = args.delete
+    if LIST:
+        snap = Snapshot(es, REPO)
+        print(snap.showSnap())
+    if CREATE or DELETE:
+        print("NOT IMPLEMENTED")
+
+
+def repoCommands(es, args):
+    LIST = args.list
+    REPO = args.repo
+    if LIST:
+        repo = Repository(es, REPO)
+        print(repo.listRepo())
+    if REPO:
+        print("NOT IMPLEMENTED")
+
+
+def main():
+    args = get_args()
+    SERVER = args.server
+    PORT = args.port
+    is_reachable(SERVER, PORT)
+    es = Elasticsearch(SERVER, port=PORT)
+    info = Info(es)
+    if args.parser_name == "indices":
+        indicesCommands(es, info, args)
+    elif args.parser_name == "snapshot":
+        snapCommands(es, args)
+    elif args.parser_name == "repo":
+        repoCommands(es, args)
 
 if __name__ == "__main__":
     main()
