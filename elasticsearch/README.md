@@ -31,7 +31,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -s SERVER, --server SERVER
                         Elasticsearch Address
-  -p PORT, --port PORT  Elasticsearch port
+  -p PORT, --port PORT  Elasticsearch Port
 ```
 
 You can check the help for the different arguments (indices, snapshot, repo).

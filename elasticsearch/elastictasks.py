@@ -3,7 +3,7 @@
 # @Date:   2016-10-11T21:17:52-04:00
 # @Email:  aldenso@gmail.com
 # @Last modified by:   Aldo Sotolongo
-# @Last modified time: 2016-10-12T21:33:02-04:00
+# @Last modified time: 2016-10-12T21:55:52-04:00
 
 from elasticsearch import Elasticsearch
 from datetime import datetime
@@ -206,7 +206,7 @@ def get_args():
         required=True)
     parser.add_argument(
         "-p", "--port", type=int,
-        help="Elasticsearch port",
+        help="Elasticsearch Port",
         default=9200,
         required=False)
     subparserrepo = parser.add_subparsers(help="commands", dest="parser_name")
@@ -254,7 +254,7 @@ def indicesCommands(es, info, args):
         print("Indices: {}\n{}\n{}\n"
               .format(indicesinfo.count,  # count
                       "=" * 70,
-                      indicesinfo.listinlines  # list with joined with "\n"
+                      indicesinfo.listinlines  # list joined with "\n"
                       )
               )
     elif OPEN and DAYS is not None:
@@ -271,7 +271,7 @@ def indicesCommands(es, info, args):
         print("Open Indices: {}\n{}\n{}\n"
               .format(openindicesinfo.count,  # count
                       "=" * 70,
-                      openindicesinfo.listinlines  # list with joined with "\n"
+                      openindicesinfo.listinlines  # list joined with "\n"
                       )
               )
     elif CLOSE and DAYS is not None:
