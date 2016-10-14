@@ -3,9 +3,10 @@
 # @Date:   2016-10-11T21:17:52-04:00
 # @Email:  aldenso@gmail.com
 # @Last modified by:   Aldo Sotolongo
-# @Last modified time: 2016-10-12T21:55:52-04:00
+# @Last modified time: 2016-10-13T22:50:44-04:00
 
 from elasticsearch import Elasticsearch
+import elasticsearch.exceptions as Exceptions
 from datetime import datetime
 from collections import namedtuple
 import json
@@ -68,6 +69,9 @@ class Info:
 
     def getIndicesToOpen(self, days):
         data = self.getIndicesClose()[1]
+        if len(data) == 0:
+            print("No indices to Open for indicated range.")
+            sys.exit(1)
         toopen = []
         datalist = data.split("\n")
         for x in datalist:
@@ -94,14 +98,18 @@ class Info:
                 continue
             # health status index pri rep docs.count docs.deleted store.size
             # pri.store.size
-            [health, status, index, pri, rep,
-                docs_count, docs_deleted, store_size,
-                pri_store_size] = x.split(" ")
-            datestamp = "".join(index.split("-")[-1:])
-            index_date = datetime.strptime(str(datestamp), "%Y.%m.%d")
-            diff = datetime.now() - index_date
-            if diff.days > days:
-                toclose.append(index)
+            try:
+                [health, status, index, pri, rep,
+                    docs_count, docs_deleted, store_size,
+                    pri_store_size] = x.split(" ")
+                datestamp = "".join(index.split("-")[-1:])
+                index_date = datetime.strptime(str(datestamp), "%Y.%m.%d")
+                diff = datetime.now() - index_date
+                if diff.days > days:
+                    toclose.append(index)
+            except Exception:
+                print("No indices to Close for indicated range.")
+                sys.exit(1)
         return toclose
 
 
@@ -162,7 +170,16 @@ class Snapshot:
         return json.dumps(show, indent=4)
 
     def createSnap(self):
-        pass
+            repository = self.repo
+            snapshot = self.snapname
+            INDICES = ", ".join(self.idxlist)
+            data = {}
+            data["indices"] = INDICES
+            data["ignore_unavailable"] = "true"
+            data["include_global_state"] = "false"
+            json_data = json.dumps(data)
+            self.esinst.snapshot.create(repository=repository,
+                                        snapshot=snapshot, body=json_data)
 
 
 class Repository:
@@ -232,10 +249,14 @@ def get_args():
     snap.add_argument("--repo", action="store", help="Repository to use",
                       required=True)
     snapgroup1 = snap.add_mutually_exclusive_group()
-    snapgroup1.add_argument("--create", action="store", help="Create Snapshot")
+    snapgroup1.add_argument("--create", action="store",
+                            help="Create Snapshot")
     snapgroup1.add_argument("--delete", action="store", help="Delete Snapshot")
+    snap.add_argument("-i", "--index", action="store",
+                      help="List of indices for Snap", nargs="+")
     # Parser for repositories
-    repo = subparserrepo.add_parser("repo", help="Actions with repositories")
+    repo = subparserrepo.add_parser("repository",
+                                    help="Actions with repositories")
     repo.add_argument("-l", "--list", action="store_true")
     repo.add_argument("--repo", action="store")
 
@@ -244,12 +265,12 @@ def get_args():
 
 
 def indicesCommands(es, info, args):
-    INDICES = args.list
+    LIST = args.list
     OPEN = args.open
     CLOSE = args.close
     INDEX = args.index
     DAYS = args.days
-    if INDICES:
+    if LIST:
         indicesinfo = info.getIndices()
         print("Indices: {}\n{}\n{}\n"
               .format(indicesinfo.count,  # count
@@ -276,6 +297,9 @@ def indicesCommands(es, info, args):
               )
     elif CLOSE and DAYS is not None:
         indicestoclose = info.getIndicesToClose(DAYS)
+        if len(indicestoclose) == 0:
+            print("No indices to close for specified range.")
+            sys.exit(1)
         print("Closing:\n{}".format('\n'.join(indicestoclose)))
         mod = Modify(es, indicestoclose)
         mod.Close()
@@ -291,6 +315,8 @@ def indicesCommands(es, info, args):
                       closeindicesinfo.listinlines  # list joined with "\n"
                       )
               )
+    else:
+        print("Missing options")
 
 
 def snapCommands(es, args):
@@ -300,9 +326,44 @@ def snapCommands(es, args):
     DELETE = args.delete
     if LIST:
         snap = Snapshot(es, REPO)
-        print(snap.showSnap())
-    if CREATE or DELETE:
+        try:
+            print(snap.showSnap())
+        except Exceptions.NotFoundError as err:
+            print("Error: Repo not found.\n{}".format(err))
+    elif CREATE and args.index is not None:
+        INDICES = args.index
+        # To avoid leaving indices out of the snapshot, we are converting the
+        # indices input.
+        #
+        # elastictask.py -s SERVER snapshot --repo archives \
+        # --create snapshot_test1 --index INDEX1 INDEX2
+        # the returned arg for INDICES is ["INDEX1", "INDEX2"]
+        # This arg will FAIL.
+        #
+        # elastictask.py -s SERVER snapshot --repo archives \
+        # --create snapshot_test1 --index INDEX1,INDEX2
+        # the returned arg for INDICES is ["INDEX1,INDEX2"]
+        # This arg will WORK.
+        if len(INDICES) > 1:
+            joined = [",".join(INDICES)]
+            INDICES = joined
+        SNAP = args.create
+        try:
+            Snapshot(es, REPO, snapname=SNAP, idxlist=INDICES).createSnap()
+        except Exceptions.RequestError as err:
+            print("Error: Duplicated snapshot name.\n{}".format(err))
+            sys.exit(1)
+        except Exceptions.AuthorizationException as err:
+            print("Error: index closed.\n{}".format(err))
+            sys.exit(1)
+        print("Creating Snapshot for:\n{}".format(INDICES))
+    elif CREATE and args.index is None:
+        print("You must indicate the indices for the snapshot."
+              " (--index index1 index2  or --index index1,index2)")
+    elif DELETE:
         print("NOT IMPLEMENTED")
+    else:
+        print("Missing options")
 
 
 def repoCommands(es, args):
@@ -311,7 +372,7 @@ def repoCommands(es, args):
     if LIST:
         repo = Repository(es, REPO)
         print(repo.listRepo())
-    if REPO:
+    elif REPO:
         print("NOT IMPLEMENTED")
 
 
@@ -326,7 +387,7 @@ def main():
         indicesCommands(es, info, args)
     elif args.parser_name == "snapshot":
         snapCommands(es, args)
-    elif args.parser_name == "repo":
+    elif args.parser_name == "repository":
         repoCommands(es, args)
 
 if __name__ == "__main__":

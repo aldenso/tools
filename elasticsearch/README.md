@@ -16,16 +16,17 @@ pip install elasticsearch
 Usage
 ```
 $ ./elastictask.py -h
-usage: elastictask.py [-h] -s SERVER [-p PORT] {indices,snapshot,repo} ...
+usage: elastictask.py [-h] -s SERVER [-p PORT]
+                      {indices,snapshot,repository} ...
 
 Script to handle some common tasks in Elasticsearch
 
 positional arguments:
-  {indices,snapshot,repo}
+  {indices,snapshot,repository}
                         commands
     indices             Actions with indices
     snapshot            Actions with snapshots
-    repo                Actions with repositories
+    repository          Actions with repositories
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -184,4 +185,12 @@ $ ./elastictask.py -s elk.aldoca.local snapshot --repo archives --list
         }
     ]
 }
+```
+
+Creating snapshot 'snapshot_2' in 'archives' repository.
+
+```
+$ ./elastictask.py -s elk.aldoca.local snapshot --repo archives --create snapshot_2 --index logstash-2016.09.22 logstash-2016.09.23
+Creating Snapshot for:
+['logstash-2016.09.22,logstash-2016.09.23']
 ```
