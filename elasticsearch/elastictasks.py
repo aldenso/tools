@@ -3,7 +3,7 @@
 # @Date:   2016-10-11T21:17:52-04:00
 # @Email:  aldenso@gmail.com
 # @Last modified by:   Aldo Sotolongo
-# @Last modified time: 2016-10-13T22:50:44-04:00
+# @Last modified time: 2016-10-19T21:11:43-04:00
 
 from elasticsearch import Elasticsearch
 import elasticsearch.exceptions as Exceptions
@@ -170,16 +170,22 @@ class Snapshot:
         return json.dumps(show, indent=4)
 
     def createSnap(self):
-            repository = self.repo
-            snapshot = self.snapname
-            INDICES = ", ".join(self.idxlist)
-            data = {}
-            data["indices"] = INDICES
-            data["ignore_unavailable"] = "true"
-            data["include_global_state"] = "false"
-            json_data = json.dumps(data)
-            self.esinst.snapshot.create(repository=repository,
-                                        snapshot=snapshot, body=json_data)
+        repository = self.repo
+        snapshot = self.snapname
+        INDICES = ", ".join(self.idxlist)
+        data = {}
+        data["indices"] = INDICES
+        data["ignore_unavailable"] = "true"
+        data["include_global_state"] = "false"
+        json_data = json.dumps(data)
+        self.esinst.snapshot.create(repository=repository,
+                                    snapshot=snapshot, body=json_data)
+
+    def deleteSnap(self):
+        repository = self.repo
+        snapshot = self.snapname
+        self.esinst.snapshot.delete(repository=repository,
+                                    snapshot=snapshot)
 
 
 class Repository:
@@ -360,8 +366,16 @@ def snapCommands(es, args):
     elif CREATE and args.index is None:
         print("You must indicate the indices for the snapshot."
               " (--index index1 index2  or --index index1,index2)")
+    elif DELETE and args.index is not None:
+        print("Can't mix delete snapshot with indices")
     elif DELETE:
-        print("NOT IMPLEMENTED")
+        SNAP = args.delete
+        try:
+            print("Deleting snapshot: {} in repository: {}"
+                  .format(SNAP, REPO))
+            Snapshot(es, REPO, snapname=SNAP).deleteSnap()
+        except Exceptions.TransportError as err:
+            print("Error: Snapshot not found.\n{}".format(err))
     else:
         print("Missing options")
 

@@ -5,8 +5,6 @@ Small script to handle some recurrent tasks related to Elasticsearch.
 
 **Note**: tasks like opening or closing indices based on X days (older than X) are expecting to find an index name format like logstash-YYYY.MM.DD
 
-TODOS: Snapshots and related task like setting a repository, range for days in open/close indices.
-
 First you need to install elasticsearch.py
 
 ```bash
@@ -193,4 +191,11 @@ Creating snapshot 'snapshot_2' in 'archives' repository.
 $ ./elastictask.py -s elk.aldoca.local snapshot --repo archives --create snapshot_2 --index logstash-2016.09.22 logstash-2016.09.23
 Creating Snapshot for:
 ['logstash-2016.09.22,logstash-2016.09.23']
+```
+
+Deleting snapshot 'snapshot_1' in 'archives' repository.
+
+```
+$ ./elastictask.py -s elk.aldoca.local snapshot --repo archives --delete snapshot_1
+Deleting snapshots: snapshot_1 in repository: archives
 ```
