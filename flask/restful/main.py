@@ -10,35 +10,52 @@ ITEMS = [
     {'id': 2,
      'name': 'item2',
      'description': "some description for item2"}
-    ]
+]
+
 
 # Avoid html response for errors
 @app.errorhandler(404)
 def not_found(error):
+    """Return json response for not found."""
     return make_response(jsonify({'error': 'Not found'}), 404)
+
+
+# Avoid html response for errors
+@app.errorhandler(400)
+def bad_request(error):
+    """Return json response for bad request."""
+    return make_response(jsonify({'error': 'Bad Request'}), 400)
+
 
 @app.route('/myapp/api/v1/items', methods=['GET'])
 def get_items():
+    """Return all items."""
     return jsonify({'items': ITEMS})
+
 
 @app.route('/myapp/api/v1/items/id/<int:item_id>', methods=['GET'])
 def get_item_by_id(item_id):
+    """Return item by ID."""
     item = [item for item in ITEMS if item['id'] == item_id]
     if len(item) == 0:
         abort(404)
     return jsonify({'item': item[0]})
 
+
 @app.route('/myapp/api/v1/items/name/<string:item_name>', methods=['GET'])
 def get_item_by_name(item_name):
+    """Return item by name."""
     item = [item for item in ITEMS if item['name'] == item_name]
     if len(item) == 0:
         abort(404)
     return jsonify({'item': item[0]})
 
+
 @app.route('/myapp/api/v1/items', methods=['POST'])
 def create_item():
-    if not request.json or not 'name' in request.json:
-        abort(404)
+    """Create new item."""
+    if not request.json or 'name' not in request.json:
+        abort(400)
     item = {
         'id': ITEMS[-1]['id'] + 1,
         'name': request.json['name'],
@@ -47,8 +64,10 @@ def create_item():
     ITEMS.append(item)
     return jsonify({'item': item}), 201
 
+
 @app.route('/myapp/api/v1/items/id/<int:item_id>', methods=['PUT'])
 def update_item(item_id):
+    """Update item by ID."""
     item = [item for item in ITEMS if item['id'] == item_id]
     if len(item) == 0:
         abort(404)
@@ -58,8 +77,10 @@ def update_item(item_id):
     item[0]['description'] = request.json.get('description', item[0]['description'])
     return jsonify({'item': item})
 
+
 @app.route('/myapp/api/v1/items/id/<int:item_id>', methods=['DELETE'])
 def delete_item(item_id):
+    """Delete item from items by ID."""
     item = [item for item in ITEMS if item['id'] == item_id]
     if len(item) == 0:
         abort(404)

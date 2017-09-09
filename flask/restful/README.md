@@ -96,7 +96,7 @@ Update item by id.
 Delete item by id.
 
 ```
-(flaskapp) [aldenso@ansible myapp]$ curl http://localhost:5000/myapp/api/v1/items/id/2 -X DELETE -v
+(flaskapp) $ curl http://localhost:5000/myapp/api/v1/items/id/2 -X DELETE -v
 * About to connect() to localhost port 5000 (#0)
 *   Trying ::1...
 * Connection refused
