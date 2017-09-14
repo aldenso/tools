@@ -1,15 +1,29 @@
 Restful API
 ===========
 
-Restful api example using standard flask.
+Restful api example using standard flask and flask-limiter (rate limiter).
 
-Install flask.
+Create you virtual environment and activate it.
 
 ```
-pip install flask
+$ python -m venv flaskapp
+$ source flaskapp/bin/activate
+(flaskapp)$
 ```
 
-Run api server.
+Install flask and flask-limiter.
+
+```
+(flaskapp)$ pip install flask flask-limiter
+```
+
+or use the requirements file.
+
+```
+(flaskapp)$ pip install -r requirements.txt
+```
+
+Run the api server.
 
 ```
 (flaskapp)$ python main.py
@@ -22,7 +36,7 @@ Run api server.
 Show all items.
 
 ```
-(flaskapp)$ curl http://localhost:5000/myapp/api/v1/items -X GET
+$ curl http://localhost:5000/myapp/api/v1/items -X GET
 {
   "items": [
     {
@@ -42,7 +56,7 @@ Show all items.
 Create item.
 
 ```
-(flaskapp)$ curl http://localhost:5000/myapp/api/v1/items -X POST -d '{"name":"item3", "description":"something"}' -H "Content-Type: application/json"
+$ curl http://localhost:5000/myapp/api/v1/items -X POST -d '{"name":"item3", "description":"something"}' -H "Content-Type: application/json"
 {
   "item": {
     "description": "something",
@@ -55,7 +69,7 @@ Create item.
 Show item by id.
 
 ```
-(flaskapp)$ curl http://localhost:5000/myapp/api/v1/items/id/3 -X GET
+$ curl http://localhost:5000/myapp/api/v1/items/id/3 -X GET
 {
   "item": {
     "description": "something",
@@ -68,7 +82,7 @@ Show item by id.
 Show item by name.
 
 ```
-(flaskapp)$ curl http://localhost:5000/myapp/api/v1/items/name/item3 -X GET
+$ curl http://localhost:5000/myapp/api/v1/items/name/item3 -X GET
 {
   "item": {
     "description": "something",
@@ -81,7 +95,7 @@ Show item by name.
 Update item by id.
 
 ```
-(flaskapp)$ curl http://localhost:5000/myapp/api/v1/items/id/2 -X PUT -d '{"name":"item2", "description":"something new"}' -H "Content-Type: application/json"
+$ curl http://localhost:5000/myapp/api/v1/items/id/2 -X PUT -d '{"name":"item2", "description":"something new"}' -H "Content-Type: application/json"
 {
   "item": [
     {
@@ -96,7 +110,7 @@ Update item by id.
 Delete item by id.
 
 ```
-(flaskapp) $ curl http://localhost:5000/myapp/api/v1/items/id/2 -X DELETE -v
+$ curl http://localhost:5000/myapp/api/v1/items/id/2 -X DELETE -v
 * About to connect() to localhost port 5000 (#0)
 *   Trying ::1...
 * Connection refused
@@ -116,11 +130,11 @@ Delete item by id.
 <
 * Closing connection 0
 
-(flaskapp)$ curl http://localhost:5000/myapp/api/v1/items/id/2 -X GET
+$ curl http://localhost:5000/myapp/api/v1/items/id/2 -X GET
 {
   "error": "Not found"
 }
-(flaskapp)$ curl http://localhost:5000/myapp/api/v1/items -X GET
+$ curl http://localhost:5000/myapp/api/v1/items -X GET
 {
   "items": [
     {
@@ -134,5 +148,13 @@ Delete item by id.
       "name": "item3"
     }
   ]
+}
+```
+
+When you hit some rate limiter, you'll see a response like this.
+
+```
+{
+  "error": "Too Many Requests"
 }
 ```
