@@ -9,15 +9,17 @@
 # Notes:
 # lssci version >= 0.27 supports --size (-s) and --scsi_id (-i)
 
-LSBLKFILE="lsblkfile.txt"
-BLKIDFILE="blkidfile.txt"
-LSSCSIFILE="lsscsifile.txt"
-MULTIPATHFILE="multipathfile.txt"
+DATE=$(date +%d%m%y_%H%M%S)
+LSBLKFILE="lsblkfile_$DATE.txt"
+BLKIDFILE="blkidfile_$DATE.txt"
+LSSCSIFILE="lsscsifile_$DATE.txt"
+MULTIPATHFILE="multipathfile_$DATE.txt"
 
 continue="NO"
+scriptfile="typescript.temp"
 
 CheckSOVersion() {
-    python -c 'import yum, pprint; yb = yum.YumBase(); print yb.conf.yumvar["releasever"]' | tail -1
+    python -c 'import yum; yb = yum.YumBase(); print yb.conf.yumvar["releasever"]' | tail -1
 }
 
 CheckLSSCSI() {
@@ -57,7 +59,8 @@ CreateFiles() {
     if [ "$continue" == "YES" ]
     then
         # unbuffered lsscsi version to be able to handle the ouput, and compare to a float
-        lsscsiversion=$(script -c "lsscsi -V" | grep version | awk '{print $2}'| head -1)
+        lsscsiversion=$(script -c "lsscsi -V" $scriptfile | grep version | awk '{print $2}'| head -1)
+        rm $scriptfile
         var=$(echo "$lsscsiversion >= 0.27" | bc -l)
         if [ "$var" -eq 1 ]
         then
