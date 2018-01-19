@@ -12,6 +12,9 @@
 LSBLKFILE="lsblkfile.txt"
 BLKIDFILE="blkidfile.txt"
 LSSCSIFILE="lsscsifile.txt"
+MULTIPATHFILE="multipathfile.txt"
+
+continue="NO"
 
 CheckSOVersion() {
     python -c 'import yum, pprint; yb = yum.YumBase(); print yb.conf.yumvar["releasever"]' | tail -1
@@ -20,9 +23,18 @@ CheckSOVersion() {
 CheckLSSCSI() {
     if command -v lsscsi > /dev/null
     then 
-        echo "lsscsi is installed"
+        echo "lsscsi is installed"; continue="YES"
     else
-        echo "lsscsi not installed"; exit 1
+        echo "lsscsi not installed"; continue="NO"
+    fi
+}
+
+CheckMultipath() {
+    if command -v multipath > /dev/null
+    then
+        echo "Multipath is installed"; continue="YES"
+    else
+        echo "Multipath not installed"; continue="NO"
     fi
 }
 
@@ -36,20 +48,29 @@ CreateFiles() {
             "part|disk|NAME" | grep -v fd > $LSBLKFILE
     else
         lsblk -l -o NAME,KNAME,TYPE,MODEL,SIZE,LABEL,UUID,STATE| grep -E "part|disk|NAME" \
-            grep -v fd > $LSBLKFILE
+            | grep -v fd > $LSBLKFILE
     fi
 
-    blkid| grep -E -v "/dev/mapper|xfs" | sort > $BLKIDFILE 2>/dev/null
+    blkid | sort > $BLKIDFILE 2>/dev/null
 
     CheckLSSCSI
-    # unbuffered lsscsi version to be able to handle the ouput, and compare to a float
-    lsscsiversion=$(script -c "lsscsi -V" | awk '{print $2}'| head -1)
-    var=$(echo "$lsscsiversion >= 0.27" | bc -l)
-    if [ "$var" -eq 1 ]
+    if [ "$continue" == "YES" ]
     then
-        lsscsi -is| grep disk > $LSSCSIFILE
-    else
-        lsscsi |grep disk > $LSSCSIFILE
+        # unbuffered lsscsi version to be able to handle the ouput, and compare to a float
+        lsscsiversion=$(script -c "lsscsi -V" | grep version | awk '{print $2}'| head -1)
+        var=$(echo "$lsscsiversion >= 0.27" | bc -l)
+        if [ "$var" -eq 1 ]
+        then
+            lsscsi -is| grep disk > $LSSCSIFILE
+        else
+            lsscsi |grep disk > $LSSCSIFILE
+        fi
+    fi
+
+    CheckMultipath
+    if [ "$continue" == "YES" ]
+    then
+        multipath -ll > $MULTIPATHFILE
     fi
 }
 
