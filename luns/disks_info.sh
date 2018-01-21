@@ -14,6 +14,7 @@ LSBLKFILE="lsblkfile_$DATE.txt"
 BLKIDFILE="blkidfile_$DATE.txt"
 LSSCSIFILE="lsscsifile_$DATE.txt"
 MULTIPATHFILE="multipathfile_$DATE.txt"
+ASMLISTFILE="asmlistfile_$DATE.txt"
 
 continue="NO"
 scriptfile="typescript.temp"
@@ -40,20 +41,29 @@ CheckMultipath() {
     fi
 }
 
+CheckASM() {
+    if command -v oracleasm > /dev/null
+    then
+        echo "Oracle ASM is installed"; continue="YES"
+    else
+        echo "Oracla ASM not installed"; continue="NO"
+    fi
+}
+
 
 CreateFiles() {
-    echo "Gathering info from disks (lsblk, blkid and lsscsi)"
+    echo "Gathering info from disks (lsblk, blkid, lsscsi, multipath and ASM)"
     version=$(CheckSOVersion)
     if [ "$version" == "7Server" ]
     then
         lsblk -l -o NAME,KNAME,TYPE,HCTL,VENDOR,MODEL,SIZE,LABEL,UUID,SERIAL,STATE| grep -E \
-            "part|disk|NAME" | grep -v fd > $LSBLKFILE
+            "part|disk|NAME" | grep -v fd > "$LSBLKFILE"
     else
         lsblk -l -o NAME,KNAME,TYPE,MODEL,SIZE,LABEL,UUID,STATE| grep -E "part|disk|NAME" \
-            | grep -v fd > $LSBLKFILE
+            | grep -v fd > "$LSBLKFILE"
     fi
 
-    blkid | sort > $BLKIDFILE 2>/dev/null
+    blkid | sort > "$BLKIDFILE" 2>/dev/null
 
     CheckLSSCSI
     if [ "$continue" == "YES" ]
@@ -64,16 +74,22 @@ CreateFiles() {
         var=$(echo "$lsscsiversion >= 0.27" | bc -l)
         if [ "$var" -eq 1 ]
         then
-            lsscsi -is| grep disk > $LSSCSIFILE
+            lsscsi -is| grep disk > "$LSSCSIFILE"
         else
-            lsscsi |grep disk > $LSSCSIFILE
+            lsscsi |grep disk > "$LSSCSIFILE"
         fi
     fi
 
     CheckMultipath
     if [ "$continue" == "YES" ]
     then
-        multipath -ll > $MULTIPATHFILE
+        multipath -ll > "$MULTIPATHFILE"
+    fi
+
+    CheckASM
+    if [ "$continue" == "YES" ]
+    then
+        oracleasm listdisks > "$ASMLISTFILE"
     fi
 }
 
