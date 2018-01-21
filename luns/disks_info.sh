@@ -9,6 +9,11 @@
 # Notes:
 # lssci version >= 0.27 supports --size (-s) and --scsi_id (-i)
 
+if [ "$EUID" -ne 0 ]
+then
+    echo "You need root privileges"; exit 1
+fi
+
 DATE=$(date +%d%m%y_%H%M%S)
 LSBLKFILE="lsblkfile_$DATE.txt"
 BLKIDFILE="blkidfile_$DATE.txt"
