@@ -15,6 +15,8 @@ BLKIDFILE="blkidfile_$DATE.txt"
 LSSCSIFILE="lsscsifile_$DATE.txt"
 MULTIPATHFILE="multipathfile_$DATE.txt"
 ASMLISTFILE="asmlistfile_$DATE.txt"
+ASMMULTIPATHFILE="asmmultipathfile_$DATE.txt"
+ASMDEVSFILE="asmdevsfile_$DATE.txt"
 
 continue="NO"
 scriptfile="typescript.temp"
@@ -90,6 +92,19 @@ CreateFiles() {
     if [ "$continue" == "YES" ]
     then
         oracleasm listdisks > "$ASMLISTFILE"
+        if [ -f "$MULTIPATHFILE" ]
+        then
+            disks=$(grep "dm-" "$MULTIPATHFILE" | awk '{print $1}')
+            for disk in $disks
+            do
+                oracleasm querydisk /dev/mapper/"$disk" >> "$ASMMULTIPATHFILE" 2>&1
+            done
+        fi
+        parts=$(grep part "$LSBLKFILE" | grep -v "dm-" | awk '{print $1}')
+        for part in $parts
+        do
+            oracleasm querydisk /dev/"$part" >> "$ASMDEVSFILE" 2>&1
+        done
     fi
 }
 
