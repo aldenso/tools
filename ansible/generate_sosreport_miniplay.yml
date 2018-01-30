@@ -1,0 +1,42 @@
+---
+- hosts: oslinux-group
+  user: myremoteuser
+  become: yes
+  gather_facts: yes
+  vars:
+    tmpdir: "/var/tmp/sos-ansible"
+    tmpdirowner: "myremoteuser"
+    dirmode: 0700
+    localdir: "/home/mylocaluser/sosreports/"
+  tasks:
+  - debug: var=ansible_date_time.iso8601_basic_short
+  - debug: var=ansible_hostname
+  - name: create local directory {{ localdir }} to store sosreports
+    local_action:
+      module: file
+      path: "{{ localdir }}"
+      state: directory
+      mode: "{{ dirmode }}"
+    run_once: yes
+  - name: create dir for ansible sosreports
+    file: path={{ tmpdir }} state=directory owner={{ tmpdirowner }} mode={{ dirmode }}
+  - name: create sosreport
+    shell: "/usr/sbin/sosreport --batch --tmp-dir {{ tmpdir }}"
+  - name: rename sosreport
+    shell: "mv -f {{ tmpdir }}/*tar.xz {{ tmpdir }}/sosreport_{{ ansible_hostname }}_{{ ansible_date_time.iso8601_basic_short }}.tar.xz"
+  - name: rename sosreport MD5
+    shell: "mv -f {{ tmpdir }}/*tar.xz.md5 {{ tmpdir }}/sosreport_{{ ansible_hostname }}_{{ ansible_date_time.iso8601_basic_short }}.tar.xz.md5"
+  - name: fetch sosreport
+    fetch:
+      src: "{{ tmpdir }}/sosreport_{{ ansible_hostname }}_{{ ansible_date_time.iso8601_basic_short }}.tar.xz"
+      dest: "{{ localdir }}"
+      flat: yes
+  - name: fetch sosreport MD5
+    fetch:
+      src: "{{ tmpdir }}/sosreport_{{ ansible_hostname }}_{{ ansible_date_time.iso8601_basic_short }}.tar.xz.md5"
+      fail_on_missing: yes
+      dest: "{{ localdir }}"
+      flat: yes
+      validate_checksum: yes
+  - name: remove dir for ansible sosreports
+    file: path={{ tmpdir }} state=absent
