@@ -54,7 +54,7 @@ def get_items():
 def get_item_by_id(item_id):
     """Return item by ID."""
     item = [item for item in ITEMS if item['id'] == item_id]
-    if len(item) == 0:
+    if not item:
         abort(404)
     return jsonify({'item': item[0]})
 
@@ -64,7 +64,7 @@ def get_item_by_id(item_id):
 def get_item_by_name(item_name):
     """Return item by name."""
     item = [item for item in ITEMS if item['name'] == item_name]
-    if len(item) == 0:
+    if not item:
         abort(404)
     return jsonify({'item': item[0]})
 
@@ -89,7 +89,7 @@ def create_item():
 def update_item(item_id):
     """Update item by ID."""
     item = [item for item in ITEMS if item['id'] == item_id]
-    if len(item) == 0:
+    if not item:
         abort(404)
     if not request.json:
         abort(404)
@@ -103,7 +103,7 @@ def update_item(item_id):
 def delete_item(item_id):
     """Delete item from items by ID."""
     item = [item for item in ITEMS if item['id'] == item_id]
-    if len(item) == 0:
+    if not item:
         abort(404)
     ITEMS.remove(item[0])
     return ('', 204)

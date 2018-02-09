@@ -1,11 +1,10 @@
-Restful API
-===========
+# Restful API
 
 Restful api example using standard flask and flask-limiter (rate limiter).
 
 Create you virtual environment and activate it.
 
-```
+```sh
 $ python -m venv flaskapp
 $ source flaskapp/bin/activate
 (flaskapp)$
@@ -13,19 +12,19 @@ $ source flaskapp/bin/activate
 
 Install flask and flask-limiter.
 
-```
+```sh
 (flaskapp)$ pip install flask flask-limiter
 ```
 
 or use the requirements file.
 
-```
+```sh
 (flaskapp)$ pip install -r requirements.txt
 ```
 
 Run the api server.
 
-```
+```sh
 (flaskapp)$ python main.py
  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
  * Restarting with stat
@@ -35,7 +34,7 @@ Run the api server.
 
 Show all items.
 
-```
+```sh
 $ curl http://localhost:5000/myapp/api/v1/items -X GET
 {
   "items": [
@@ -55,7 +54,7 @@ $ curl http://localhost:5000/myapp/api/v1/items -X GET
 
 Create item.
 
-```
+```sh
 $ curl http://localhost:5000/myapp/api/v1/items -X POST -d '{"name":"item3", "description":"something"}' -H "Content-Type: application/json"
 {
   "item": {
@@ -68,7 +67,7 @@ $ curl http://localhost:5000/myapp/api/v1/items -X POST -d '{"name":"item3", "de
 
 Show item by id.
 
-```
+```sh
 $ curl http://localhost:5000/myapp/api/v1/items/id/3 -X GET
 {
   "item": {
@@ -81,7 +80,7 @@ $ curl http://localhost:5000/myapp/api/v1/items/id/3 -X GET
 
 Show item by name.
 
-```
+```sh
 $ curl http://localhost:5000/myapp/api/v1/items/name/item3 -X GET
 {
   "item": {
@@ -94,7 +93,7 @@ $ curl http://localhost:5000/myapp/api/v1/items/name/item3 -X GET
 
 Update item by id.
 
-```
+```sh
 $ curl http://localhost:5000/myapp/api/v1/items/id/2 -X PUT -d '{"name":"item2", "description":"something new"}' -H "Content-Type: application/json"
 {
   "item": [
@@ -109,7 +108,7 @@ $ curl http://localhost:5000/myapp/api/v1/items/id/2 -X PUT -d '{"name":"item2",
 
 Delete item by id.
 
-```
+```sh
 $ curl http://localhost:5000/myapp/api/v1/items/id/2 -X DELETE -v
 * About to connect() to localhost port 5000 (#0)
 *   Trying ::1...
@@ -153,7 +152,7 @@ $ curl http://localhost:5000/myapp/api/v1/items -X GET
 
 When you hit some rate limiter, you'll see a response like this.
 
-```
+```sh
 {
   "error": "Too Many Requests"
 }
