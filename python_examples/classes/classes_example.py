@@ -55,9 +55,8 @@ class Player(Clan, Race):
             return self.power + self._race.power
         elif self._clan is not None and self._race is None:
             return self.power + self._clan.influence
-        else:
-            return self.power + self._clan.influence + self._clan.Bonus +\
-                self._race.power
+        return (self.power + self._clan.influence + self._clan.Bonus +
+                self._race.power)
 
     def ownmotto(self):
         """Create clan motto plus personal motto."""
