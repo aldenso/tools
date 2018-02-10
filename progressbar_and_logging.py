@@ -5,6 +5,8 @@
 # @Last Modified By: Aldo Sotolongo
 # @Last Modified Time: May 26, 2017 2:24 PM
 # @Description: example progress bar operation with logging included
+# You need progress: pip install progress
+# Note: Still prefer progressbar33, works better even for windows.
 
 import time
 import random
@@ -24,7 +26,8 @@ logger.setLevel(logging.DEBUG)
 # create file handler which logs even debug messages
 fh = logging.FileHandler('test_out.log')
 # create formatter and add it to the handler
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(name)s - '
+                              '%(levelname)s - %(message)s')
 fh.setFormatter(formatter)
 # add the handler to logger
 logger.addHandler(fh)
