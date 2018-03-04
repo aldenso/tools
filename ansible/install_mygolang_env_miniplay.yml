@@ -11,10 +11,16 @@
     go_version_target: "go version go1.10 linux/amd64"
     set_go_path: yes
   tasks:
-  - name: Install git
+  - name: Install OS packages
     yum:
-      name: git 
+      name: "{{ item }}"
       state: present
+      update_cache: yes
+    with_items:
+      - git
+      - vim
+    tags:
+      - base-os-install
 
 
   - name: Download the Go tarball
@@ -83,7 +89,7 @@
     become: no
     environment:
       GOPATH: "{{ go_path }}"
-    shell: go get {{ item }}
+    shell: go get -u {{ item }}
     with_items:
       - github.com/axw/gocov
       - github.com/t-yuki/gocov-xml
