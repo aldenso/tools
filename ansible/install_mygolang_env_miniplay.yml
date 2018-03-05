@@ -97,7 +97,12 @@
       - github.com/gorilla/mux
       - github.com/gorilla/handlers
       - github.com/spf13/afero
+      - github.com/spf13/cobra
+      - github.com/spf13/viper
+      - github.com/BurntSushi/toml
+      - gopkg.in/mgo.v2
       - github.com/schollz/progressbar
       - golang.org/x/crypto/ssh/terminal
+      - github.com/stretchr/testify
     tags:
       - golang-packages-install
